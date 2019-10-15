@@ -27,7 +27,8 @@ class Baker(Base):
     __tablename__ = 'baker'
     id = Column(Integer, primary_key=True)
 
-    role = Column('role', String)
+    role = Column(Integer, ForeignKey('role_type.id'))
+    name = Column('name', String)
 
     # a baker can have several recipes
     recipes = relationship('Recipe', back_populates='baker') 
@@ -85,6 +86,12 @@ class UnitType(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column('name', String)
+
+class RoleType(Base):
+    __tablename__ = 'role_type'
+    id = Column(Integer, primary_key=True)
+
+    role = Column('role', String)
 
 
 if __name__ == "__main__":
