@@ -13,7 +13,7 @@ class RecipeItem(scrapy.Item):
 
     baker = scrapy.Field()
     steps = scrapy.Field()
-    description = scrapy.Field()
+    series = scrapy.Field()
 
 class IngredientItem(scrapy.Item):
     amount = scrapy.Field()
@@ -25,6 +25,7 @@ class EquipmentItem(scrapy.Item):
 
 class BakerItem(scrapy.Item):
     baker = scrapy.Field()
+    role = scrapy.Field()
 
 
 if __name__ == "__main__":

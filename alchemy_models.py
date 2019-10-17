@@ -19,7 +19,6 @@ def db_connect():
 
     return create_engine(connect_string)
 
-
 def create_tables(engine):
     Base.metadata.create_all(engine)
 
@@ -47,8 +46,11 @@ class Recipe(Base):
     difficulty = Column('difficulty', String)
     hands_on_time_amount = Column('hands_on_time_amount', Float)
     hands_on_time_unit = Column(Integer, ForeignKey('unit_type.id'))
-    steps = Column('steps', Integer)
+    recipe_steps = Column('recipe_steps', Integer)
     description = Column('description', String)
+
+    # a recipe should be connected to only one series
+    series_id = Column(Integer, ForeignKey('series.id'))
 
     # a recipe can have several ingredients and equipments
     ingredients = relationship('Ingredient', back_populates='recipe')
@@ -93,6 +95,17 @@ class RoleType(Base):
 
     role = Column('role', String)
 
+class Series(Base):
+    __tablename__ = 'series'
+    id = Column(Integer, primary_key=True)
+
+    series_number = Column('series_number', Integer)
+
+    # point to the winning recipe
+    winner = Column(Integer, ForeignKey('baker.id'))
+
+    # many recipes per series
+    recipes = relationship('Recipe', back_populates='series') 
 
 if __name__ == "__main__":
     engine = db_connect()
