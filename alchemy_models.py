@@ -28,6 +28,7 @@ class Baker(Base):
 
     role = Column(Integer, ForeignKey('role_type.id'))
     name = Column('name', String)
+    site_id = Column('site_id', Integer)
 
     # a baker can have several recipes
     recipes = relationship('Recipe', back_populates='baker') 
@@ -42,19 +43,36 @@ class Recipe(Base):
     baker_id = Column(Integer, ForeignKey('baker.id'))
     baker = relationship('Baker', back_populates='recipes')
 
-    serves = Column('serves', Integer)
+    serves = Column('serves', String)
     difficulty = Column('difficulty', String)
-    hands_on_time_amount = Column('hands_on_time_amount', Float)
-    hands_on_time_unit = Column(Integer, ForeignKey('unit_type.id'))
+    hands_on_time = Column('hands_on_time_amount', String)
+    baking_time = Column('baking_time', String)
     recipe_steps = Column('recipe_steps', Integer)
     description = Column('description', String)
 
     # a recipe should be connected to only one series
     series_id = Column(Integer, ForeignKey('series.id'))
+    series = relationship('Series', back_populates="recipes")
 
     # a recipe can have several ingredients and equipments
-    ingredients = relationship('Ingredient', back_populates='recipe')
-    equipements = relationship('Equipment', back_populates='recipe')
+    ingredients = relationship('Ingredient', back_populates="recipe")
+    equipments = relationship('Equipment', back_populates="recipe")
+
+    def __repr__(self):
+        return "Recipe {:}: {:}\nBaker name: {:}, Role: {:}, site id: {:}\nServes: {:}\nDifficulty: {:}\nHands on time: {:}\nBaking time: {:}\nSteps: {:}\nIngredients: {:}\nEquipment: {:}\nSeries: {:}\n\n".format(
+                self.id,
+                self.title,
+                self.baker.name,
+                self.baker.role,
+                self.baker.site_id,
+                self.serves,
+                self.difficulty,
+                self.hands_on_time,
+                self.baking_time,
+                self.steps,
+                len(self.ingredients),
+                len(self.equipments),
+                self.series.series_number)
 
 class Ingredient(Base):
     __tablename__ = 'ingredient'
@@ -62,10 +80,11 @@ class Ingredient(Base):
 
     # a certain ingredient is connected to a single recipe
     recipe_id = Column(Integer, ForeignKey('recipe.id'))
-    recipe = relationship('Recipe', back_populates='ingredients')
+    recipe = relationship('Recipe', back_populates="ingredients")
 
     amount = Column('amount', Float())
     ingredient_type = Column(Integer, ForeignKey('ingredient_type.id'))
+    unit_type = Column(Integer, ForeignKey('unit_type.id'))
 
 class Equipment(Base):
     __tablename__ = 'equipment'
@@ -73,7 +92,7 @@ class Equipment(Base):
 
     # a certain equipment is connected to a single recipe
     recipe_id = Column(Integer, ForeignKey('recipe.id'))
-    recipe = relationship('Recipe', back_populates='equipments')
+    recipe = relationship('Recipe', back_populates="equipments")
 
     name = Column('name', String)
 

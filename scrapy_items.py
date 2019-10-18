@@ -24,18 +24,6 @@ class EquipmentItem(scrapy.Item):
     equipment = scrapy.Field()
 
 class BakerItem(scrapy.Item):
-    baker = scrapy.Field()
+    name = scrapy.Field()
     role = scrapy.Field()
-
-
-if __name__ == "__main__":
-    baker = BakerItem(baker='John Smith')
-
-    recipe = RecipeItem(title="John's cookie", serves="4")
-    i1 = IngredientItem(amount="4", unit="tsp", ingredient="sugar")
-    i2 = IngredientItem(amount="3", unit="liter", ingredient="water")
-
-    recipe['ingredients'] = [i1, i2]
-    recipe['baker'] = baker
-
-    print(recipe)
+    site_id = scrapy.Field()

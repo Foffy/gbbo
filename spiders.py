@@ -29,21 +29,30 @@ class RecipesSpider(scrapy.Spider):
         page_links = response.css('div.recipes-loop__pagination a::attr(href)').getall()
         next_page = str(int(cur_page) + 1)
 
-        """
         for link in page_links:
             if next_page in link:
                 yield response.follow(link, self.parse)
-        """
 
     def parse_recipe(self, response):
         title = response.css('div.page-banner__title h1::text').get()
-        labels = response.css('recipe-details__item .label::text').getall()
         values = response.css('.recipe-details__item .value::text').getall()
         series = response.css('.recipe-introduction__baker p::text').re(r'\d+')
+        baking_time = ""
+        if len(values) == 4:
+            baking_time = values[3]
         if len(series) > 0:
             series = series[0]
         baker_name = response.css('.recipe-introduction__baker a::text').get()
-        baker_role = response.css('.recipe-introduction__baker a::attr(href)').re('(?<=\[)(.*)\]')[0]
+        baker_role = response.css('.recipe-introduction__baker a::attr(href)').re('(?<=\[)(.*)\]')
+        if len(baker_role) > 0:
+            baker_role = baker_role[0]
+        else:
+            baker_role = 'none'
+        baker_site_id = response.css('.recipe-introduction__baker a::attr(href)').re('\d+')
+        if len(baker_site_id) > 0:
+            baker_site_id = baker_site_id[0]
+        else:
+            baker_site_id = '0'
         recipe_steps = len(response.css('.recipe-instructions p'))
 
         ingredients = [resp.strip() for resp in response.css('.recipe-sidebar__section--ingredients p::text').getall()]
@@ -53,7 +62,7 @@ class RecipesSpider(scrapy.Spider):
         ingredients_extract = ingredients_s.str.extract('^(?P<Amount>\d*)?\s*(?P<Unit>g|ml|tsp|tbsp)?\s*(?P<Ingredient>.*)')
 
         # if no amount is found, set the value to '1'. Set the column data type to int
-        ingredients_extract['Amount'] = ingredients_extract['Amount'].replace('', '1').astype('u8')
+        ingredients_extract['Amount'] = ingredients_extract['Amount'].replace('', '1')
 
         # set default 'unit' value if no unit value is found
         ingredients_extract['Unit'] = ingredients_extract['Unit'].fillna('unit')
@@ -66,17 +75,21 @@ class RecipesSpider(scrapy.Spider):
         recipe_item['serves'] = values[0]
         recipe_item['difficulty'] = values[1]
         recipe_item['hands_on_time'] = values[2]
-        recipe_item['baking_time'] = values[3]
+        recipe_item['baking_time'] = baking_time
         recipe_item['steps'] = recipe_steps
+        recipe_item['series'] = series 
 
         recipe_item['ingredients'] = []
         recipe_item['equipments'] = []
 
         recipe_baker = scrapy_items.BakerItem()
-        recipe_baker['baker'] = baker_name
+        recipe_baker['name'] = baker_name
         recipe_baker['role'] = baker_role
+        recipe_baker['site_id'] = baker_site_id
+
         recipe_item['baker'] = recipe_baker
 
+        # convert ingredients to ingredient items
         for row in range(len(ingredients_extract)):
             ingredient_item = scrapy_items.IngredientItem()
             ingredient_item['amount'] = ingredients_extract['Amount'][row]
@@ -84,15 +97,14 @@ class RecipesSpider(scrapy.Spider):
             ingredient_item['ingredient'] = ingredients_extract['Ingredient'][row]
             recipe_item['ingredients'].append(ingredient_item)
 
+        # convert equipment to equipment items
         for row in equipment:
             equipment_item = scrapy_items.EquipmentItem()
             equipment_item['equipment'] = row
             recipe_item['equipments'].append(equipment_item)
 
-
+        # yield a finished item to the pipeline for further work
         yield recipe_item
-        with open('recipes.txt', 'a+') as f:
-            f.write("{}\n".format(title))
 
 def main():
     configure_logging({'LOG_FORMAT': '%(levelname)s: %(message)s'})
