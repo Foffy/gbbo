@@ -87,6 +87,7 @@ class RecipePipeline(object):
             ingredient_model.recipe_id = recipe_id
             ingredient_model.ingredient_type = sql_ingredient
             ingredient_model.unit_type = sql_unit
+            ingredient_model.amount = float(ingredient['amount'])
             session.add(ingredient_model)
 
     def add_equipment(self, session, item, recipe_id):
