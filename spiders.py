@@ -54,7 +54,7 @@ class RecipesSpider(scrapy.Spider):
         else:
             baker_site_id = '0'
         recipe_instructions_raw = response.css('.recipe-instructions p::text').getall()
-        recipe_steps = len(recipe_instructions_raw)
+        recipe_steps = len(response.css('.recipe-instructions p'))
         recipe_instructions = ""
         for ins in recipe_instructions_raw:
             recipe_instructions += "{}\n".format(ins)

@@ -69,7 +69,7 @@ class Recipe(Base):
                 self.difficulty,
                 self.hands_on_time,
                 self.baking_time,
-                self.steps,
+                self.recipe_steps,
                 len(self.ingredients),
                 len(self.equipments),
                 self.series.series_number)

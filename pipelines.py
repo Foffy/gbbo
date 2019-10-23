@@ -125,7 +125,7 @@ class RecipePipeline(object):
         recipe.difficulty = item['difficulty']
         recipe.hands_on_time = item['hands_on_time']
         recipe.baking_time = item['baking_time']
-        recipe.steps = item['steps']
+        recipe.recipe_steps = item['steps']
         recipe.description = item['description']
 
         try:
