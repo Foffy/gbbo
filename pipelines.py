@@ -126,6 +126,7 @@ class RecipePipeline(object):
         recipe.hands_on_time = item['hands_on_time']
         recipe.baking_time = item['baking_time']
         recipe.steps = item['steps']
+        recipe.description = item['description']
 
         try:
             recipe.series_id = self.add_series(session, item['series'])

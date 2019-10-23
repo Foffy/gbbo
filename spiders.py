@@ -53,7 +53,11 @@ class RecipesSpider(scrapy.Spider):
             baker_site_id = baker_site_id[0]
         else:
             baker_site_id = '0'
-        recipe_steps = len(response.css('.recipe-instructions p'))
+        recipe_instructions_raw = response.css('.recipe-instructions p::text').getall()
+        recipe_steps = len(recipe_instructions_raw)
+        recipe_instructions = ""
+        for ins in recipe_instructions_raw:
+            recipe_instructions += "{}\n".format(ins)
 
         ingredients = [resp.strip() for resp in response.css('.recipe-sidebar__section--ingredients p::text').getall()]
         ingredients_s = pd.Series(ingredients)
@@ -88,6 +92,7 @@ class RecipesSpider(scrapy.Spider):
         recipe_baker['site_id'] = baker_site_id
 
         recipe_item['baker'] = recipe_baker
+        recipe_item['description'] = recipe_instructions
 
         # convert ingredients to ingredient items
         for row in range(len(ingredients_extract)):
